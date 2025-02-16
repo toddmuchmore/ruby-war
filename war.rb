@@ -88,15 +88,13 @@ class Player
 end
 
 class Game
-  def initialize
-    print "Enter Player A's name: "
-    player_a_name = gets.chomp
-    print "Enter Player B's name: "
-    player_b_name = gets.chomp
-    
+  attr_reader :winner, :rounds_played
+
+  def initialize(player_a_name, player_b_name)
     @player_a = Player.new(player_a_name)
     @player_b = Player.new(player_b_name)
     @round = 1
+    @rounds_played = 0
   end
   
   def play
@@ -109,6 +107,8 @@ class Game
       @round += 1
     end
     
+    @rounds_played = @round - 1
+    @winner = @player_a.cards_count > 0 ? @player_a : @player_b
     display_winner
   end
   
@@ -187,12 +187,39 @@ class Game
   end
   
   def display_winner
-    winner = @player_a.cards_count > 0 ? @player_a : @player_b
     puts "\nGame Over!" if VERBOSE
-    puts "#{winner.name} wins the game!"
-    puts "Total rounds played: #{@round}"
+    puts "#{@winner.name} wins the game!"
+    puts "Total rounds played: #{@rounds_played}"
   end
 end
 
-# Start the game
-Game.new.play 
+# Replace the game start code with:
+print "How many games would you like to play? "
+num_games = gets.chomp.to_i
+
+print "Enter Player A's name: "
+player_a_name = gets.chomp
+print "Enter Player B's name: "
+player_b_name = gets.chomp
+
+wins = Hash.new(0)
+total_rounds = 0
+
+num_games.times do |i|
+  puts "\nStarting Game #{i + 1}"
+  puts "----------------"
+  
+  game = Game.new(player_a_name, player_b_name)
+  game.play
+  
+  wins[game.winner.name] += 1
+  total_rounds += game.rounds_played
+end
+
+puts "\nFinal Results"
+puts "============"
+puts "Games played: #{num_games}"
+wins.each do |player, win_count|
+  puts "#{player}: #{win_count} wins"
+end
+puts "Average rounds per game: #{(total_rounds.to_f / num_games).round(2)}" 
